@@ -1,9 +1,14 @@
 // SPDX-License-Identifier: GPL-3.0
 
-pragma solidity >=0.7.0 <0.9.0;
+pragma solidity 0.8.11;
 
-contract Storage {
-    uint public a = 1;
+interface IStorage {
+    
+    function setA(uint) external returns (uint);
+}
+
+contract Storage is IStorage {
+    uint public a = 0;
     
     function setA(uint _a) public returns (uint) {
         a = _a;
@@ -11,24 +16,16 @@ contract Storage {
     }
 }
 
-contract Deployed {
-    
-    function setA(uint) public returns (uint) {}
-    
-    function a() public pure returns (uint) {}
-    
-}
-
 contract ExistingWithoutABI  {
     
     address dc;
     
-    constructor(address _t) public {
+    constructor(address _t) {
         dc = _t;
     }
 
     function setA_Interface(uint _val) external returns(uint){
-        return Deployed(dc).setA(_val);
+        return IStorage(dc).setA(_val);
     }
     
     function setA_Selector(uint _val) external returns(bytes memory){
@@ -71,5 +68,12 @@ contract ExistingWithoutABI  {
             answer := mload(ptr) // Assign output to answer var
             mstore(0x40,add(ptr,0x24)) // Set storage pointer to new space
         }
+    }
+
+    function setA_FunctionSelector(uint _val) external returns(bytes memory){
+        bytes memory payload = abi.encodeWithSelector(IStorage.setA.selector, _val);
+        (bool success, bytes memory returnData) = dc.call(payload);
+        require(success);
+        return returnData;
     }
 }
