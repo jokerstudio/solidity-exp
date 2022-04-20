@@ -6,34 +6,21 @@ pragma solidity ^0.8.0;
 import "@chainlink/contracts/src/v0.8/KeeperCompatible.sol";
 
 contract AlarmClock is KeeperCompatibleInterface {
-    uint public alarmTime;
+    uint public endTime;
     bool public done;
-    bytes secret;
+    address public upkeepAddress;
 
-    constructor(uint endTimeInSeconds, string memory _secret) {
-        secret = bytes(_secret);
-        alarmTime = block.timestamp + (endTimeInSeconds * 1 seconds);
+    constructor(uint endTimeInSeconds, address _upkeepAddress) {
+        endTime = block.timestamp + (endTimeInSeconds * 1 seconds);
+        upkeepAddress = _upkeepAddress;
     }
 
     function checkUpkeep(bytes calldata checkData) external override returns (bool upkeepNeeded, bytes memory performData) {
-        if(keccak256(bytes(secret)) == keccak256(checkData))
-        {
-            upkeepNeeded = done == false && block.timestamp >= alarmTime;
-            performData = bytes(secret);
-        }
-        else
-        {
-            upkeepNeeded = false;
-        }
+        upkeepNeeded = done == false && block.timestamp >= endTime;
     }
 
     function performUpkeep(bytes calldata performData) external override {
-        if(keccak256(bytes(secret)) == keccak256(performData))
-        {
-            if(done == false) 
-            {
-                done = true;
-            }
-        }
+        require(msg.sender == upkeepAddress, "Permission denied");
+        done = true;
     }
 }
