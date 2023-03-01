@@ -2,34 +2,46 @@ pragma solidity 0.8.18;
 
 contract Base {
   uint public u;
-}
 
-contract C is Base {
   function f() public virtual {
     u = 1;
   }
 }
 
-contract B is Base {
-  function f() public virtual {
+contract A is Base {
+  function f() public virtual override {
     u = 2;
   }
 }
 
-contract A is B, C {
-  function f() public override(B, C) {  // will set u to 3
+contract B is Base {
+  function f() public virtual override {
     u = 3;
   }
+}
 
-  function f1() public { // will set u to 1
-    super.f(); //call the right first
+
+contract C is Base {
+  function f() public virtual override {
+    super.f();
+  }
+}
+
+
+contract D is A, B, C {
+  function f() public override(A, B, C) { 
+    super.f();  // invoke rigth to left from inherit order
   }
 
-  function f2() public { // will set u to 2
+  function f1() public {
+    super.f(); 
+  }
+
+  function f2() public {
     B.f();
   }
 
-  function f3() public { // will set u to 1
+  function f3() public {
     C.f();
   }
 }
