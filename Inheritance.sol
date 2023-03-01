@@ -8,6 +8,14 @@ contract Base {
   }
 }
 
+contract Base2 {
+  uint public x;
+
+  function f() public virtual {
+    x = 1;
+  }
+}
+
 contract A is Base {
   function f() public virtual override {
     u = 2;
@@ -21,7 +29,7 @@ contract B is Base {
 }
 
 
-contract C is Base {
+contract C is Base{
   function f() public virtual override {
     super.f();
   }
@@ -30,7 +38,9 @@ contract C is Base {
 
 contract D is A, B, C {
   function f() public override(A, B, C) { 
-    super.f();  // invoke rigth to left from inherit order
+    //If inheriting from the same base, invoke the right-to-left order from the inheritance before calling the base. 
+    //If not inheriting from the same base, simply invoke the base.
+    super.f();  
   }
 
   function f1() public {
