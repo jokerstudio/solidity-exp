@@ -38,8 +38,6 @@ contract C is Base{
 
 contract D is A, B, C {
   function f() public override(A, B, C) { 
-    //If inheriting from the same base, invoke the right-to-left order from the inheritance before calling the base. 
-    //If not inheriting from the same base, simply invoke the base.
     super.f();  
   }
 
